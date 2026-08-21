@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MileVision</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="icon" href="./icon/icon.png">
+</head>
+<body>
+    <header>
+        <nav class="header_nav">
+            <div><img src="./images/MileVision.png" alt="그림:마일스톤_로고.png"></div>
+            <div>
+                <a href="#">로그인</a>
+                <a href="#">회원가입</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <section id="introduce_sec">
+            <h1>내게 맞는 이정표를 만들고</h1>
+            <h1>빛나는 내일의 <span class="highlight">미래</span>를 그리다</h1>
+            <p>
+                마일비전은 AI 분석을 통해 자신의 성향 및 관심 분야,<br>
+                경험을 바탕으로 장/단기적인 직업훈련 교육과정을 설계해 드립니다.
+            </p>
+        </section>
+        <section id="point_sec">
+            <div class="point_card">
+                <img src="./images/customize.png">
+                <h2>성격/성향<br>관심분야 맞춤 설계</h2>
+            </div>
+            <div class="point_card">
+                <img src="./images/ai_analysis.png">
+                <h2>인공지능 분석</h2>
+            </div>
+            <div class="point_card">
+                <img src="./images/vision.png">
+                <h2>비전 설계 및<br>구인 촉진</h2>
+            </div>
+        </section>
+        <section id="aichat_sec">
+            <div>
+                <p>자신의 성향과 성격, 경험 등을 입력하고<br>
+                AI에게 분석받아 자신과 딱 맞는 훈련과정을 찾아보세요!</p>
+                <h2>채팅 시작하기</h2>
+            </div>
+            <div id="aichat">
+                <div id="chat_area">
+                    <div id="chat_display">
+                        <div class="ai">
+                            <div><img src="./images/logo.png"></div>
+                            <div>안녕하세요!😃 MileVision AI입니다. 무엇을 도와드릴까요?</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="input_area">
+                    <input id="query" type="text" placeholder="어떤 것이 궁금한지 AI에게 질문해보세요!">
+                    <button id="submitBtn">보내기</button>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>주소: 경기도 수원시 팔달구 중부대로 100, 풍림빌딩 신관 3층</p>
+        <p>대표번호: 031-239-5855</p>
+        <p>MileVision ⓒ 2026 MileVision Corp. All right reserved</p>
+    </footer>
+</body>
+<script defer>
+    const input = document.getElementById("query");
+    const submitBtn = document.getElementById("submitBtn");
+    const chatDisplay = document.getElementById("chat_display");
+
+    const url = "http://localhost:8000";
+
+    // 채팅 말풍선 화면에 추가
+    function addChatting(text, type) {
+        const div = document.createElement("div");
+        div.classList.add(type);
+        if(type=="user") {
+            div.innerText = text;
+
+            chatDisplay.appendChild(div);
+        } else {
+            div.innerHTML = `
+                <div><img src="./images/logo.png"></div>
+                <div>${text}</div>
+            `;
+
+            chatDisplay.appendChild(div);
+        }
+        chatDisplay.scrollTop = chatDisplay.scrollHeight; // 스크롤을 맨 아래로 내리기
+    }
+
+    // 채팅 말풍선 화면에서 제거
+    function removeChatting() {
+        chatDisplay.removeChild(chatDisplay.lastElementChild);
+    }
+
+    // 채팅 보내기
+    async function sendChatting() {
+        const chatting = input.value;
+        if(!chatting.trim()) return;
+
+        addChatting(chatting, "user");
+        input.value = "";
+
+        addChatting("AI가 생각하는 중입니다..", "ai");
+        try {
+            const res = await fetch(url + "/messages", {
+                method:"POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({query:chatting})
+            });
+
+            const data = await res.json();
+            removeChatting();
+            addChatting(data.answer, "ai");
+
+        } catch {
+            addChatting("서버에 접속하지 못했습니다. 다시 시도해주세요.", "ai");
+        }
+    }
+
+    // 이벤트 처리
+    submitBtn.addEventListener("click", sendChatting);
+    input.addEventListener("keydown", (event) => {
+        if(event.key == "Enter") {
+            sendChatting();
+        }
+    });
+
+</script>
+</html>
